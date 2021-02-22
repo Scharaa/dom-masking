@@ -49,7 +49,7 @@ library ieee;  use ieee.std_logic_1164.all;
 
 entity aes_top is
   generic (
-    PERFECTLY_INTERLEAVED : string  := "yes";  -- yes -> faster, no -> smaller
+    PERFECTLY_INTERLEAVED : string  := "no";  -- yes -> faster, no -> smaller
     -- Donot use eight-staged Sbox with Perfectly Interleaved variant!
     EIGHT_STAGED_SBOX     : string  := "no";  -- yes -> smaller, less randomness
     N                     : integer := 2       -- Protection order >= 0
