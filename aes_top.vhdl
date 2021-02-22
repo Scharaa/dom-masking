@@ -151,67 +151,68 @@ begin
   
 
   -----------------------------------------------------------------------------
-  -- Control path of NOT perfectly interleaved variant
---  NOT_perfetly_interleaved_variant: if PERFECTLY_INTERLEAVED = "no" generate
---    -- Derive control signals from LSFR and RCON
---    input_output_select_p : process (FinishedxS, K03xD, KeyInxD,
---                                     KeyOutxD, KeyToSboxOutxD, KxDI,
---                                     LastRoundxS, PTxDI, RCONxD, RstxBI,
---                                     SboxInxD, SboxOutxD, State1xS,
---                                     StateKEYADDITION1o3xS, StateKEYSCHEDULExS,
---                                     StateOutxD, StateSHIFTROWSxS) is
---      -- Variables
---      variable last4Cycles      : std_logic;  -- during cycles 17-20
---    begin  -- process input_output_select_p
+--   Control path of NOT perfectly interleaved variant
+  NOT_perfetly_interleaved_variant: if PERFECTLY_INTERLEAVED = "no" generate
+    -- Derive control signals from LSFR and RCON
+    input_output_select_p : process (FinishedxS, K03xD, KeyInxD,
+                                     KeyOutxD, KeyToSboxOutxD, KxDI,
+                                     LastRoundxS, PTxDI, RCONxD, RstxBI,
+                                     SboxInxD, SboxOutxD, State1xS,
+                                     StateKEYADDITION1o3xS, StateKEYSCHEDULExS,
+                                     StateOutxD, StateSHIFTROWSxS) is
+      -- Variables
+      variable last4Cycles      : std_logic;  -- during cycles 17-20
+    begin  -- process input_output_select_p
 
---      -- Variable assignments
---      last4Cycles := StateKEYSCHEDULExS or StateSHIFTROWSxS;
+      -- Variable assignments
+      last4Cycles := StateKEYSCHEDULExS or StateSHIFTROWSxS;
 
---      -- RCON control signals
---      nextRCONxS <= StateSHIFTROWSxS;          -- Calc next RCON value
---      showRCONxS <= State1xS;                  -- RCON value appears on output
+      -- RCON control signals
+      nextRCONxS <= StateSHIFTROWSxS;          -- Calc next RCON value
+      showRCONxS <= State1xS;                  -- RCON value appears on output
 
---      -- for each share
---      for i in N downto 0 loop
---        -- Select input of Sbox
---        if(last4Cycles = '1') then                      -- during cycles 17-20:
---          SboxInxD(i) <= KeyToSboxOutxD(i);             -- S13 to SBox
---        elsif(FinishedxS = '1') then                    -- in preliminary round:
---          SboxInxD(i) <= PTxDI(i) xor KeyInxD(i);       -- PT and key from outside
---        else                                            -- default:
---          SboxInxD(i) <= StateOutxD(i) xor KeyInxD(i);  -- S00 + K00 + K03
---        end if;
+      -- for each share
+      for i in N downto 0 loop
+        -- Select input of Sbox
+        if(last4Cycles = '1') then                      -- during cycles 17-20:
+          SboxInxD(i) <= KeyToSboxOutxD(i);             -- S13 to SBox
+        elsif(FinishedxS = '1') then                    -- in preliminary round:
+          SboxInxD(i) <= PTxDI(i) xor KeyInxD(i);       -- PT and key from outside
+        else                                            -- default:
+          SboxInxD(i) <= StateOutxD(i) xor KeyInxD(i);  -- S00 + K00 + K03
+        end if;
 
---        -- Select input of State register
---        StateInxD(i) <= SboxOutxD(i);
+        -- Select input of State register
+        StateInxD(i) <= SboxOutxD(i);
 
---        -- Select input of Key register
---        if(FinishedxS = '1') then                 -- on first round
---          KeyInxD(i) <= KxDI(i);                  -- take external key
---        elsif(StateKEYADDITION1o3xS = '1') then   -- in first 4 cycles
---          if i = 0 then                           -- first share only... 
---            KeyInxD(i) <= KeyOutxD(i) xor SboxOutxD(i) xor RCONxD;
---          else
---            KeyInxD(i) <= KeyOutxD(i) xor SboxOutxD(i);
---          end if;
---        else
---          KeyInxD(i) <= KeyOutxD(i) xor K03xD(i); -- internal key + K03
---        end if;
+        -- Select input of Key register
+        if(FinishedxS = '1') then                 -- on first round
+          KeyInxD(i) <= KxDI(i);                  -- take external key
+        elsif(StateKEYADDITION1o3xS = '1') then   -- in first 4 cycles
+          if i = 0 then                           -- first share only... 
+            KeyInxD(i) <= KeyOutxD(i) xor SboxOutxD(i) xor RCONxD;
+          else
+            KeyInxD(i) <= KeyOutxD(i) xor SboxOutxD(i);
+          end if;
+        else
+          KeyInxD(i) <= KeyOutxD(i) xor K03xD(i); -- internal key + K03
+        end if;
 
---        -- Outputs last State xor last round key
---        CxDO(i) <= SboxInxD(i);
---      end loop;  -- i
+        -- Outputs last State xor last round key
+        CxDO(i) <= SboxInxD(i);
+      end loop;  -- i
 
---      -- Move K register up during cycles 13 - 20
---      moveKupxS <= last4Cycles;
+      -- Move K register up during cycles 13 - 20
+      moveKupxS <= last4Cycles;
 
---      -- Signal that calculations are finished and CT appears at output
---      DonexSO <= State1xS and LastRoundxS;
+      -- Signal that calculations are finished and CT appears at output
+      DonexSO <= State1xS and LastRoundxS;
 
---      -- Reset RCON
---      RstRCONxS <= RstxBI;
---    end process input_output_select_p;
---  end generate NOT_perfetly_interleaved_variant;
+
+      -- Reset RCON
+      RstRCONxS <= RstxBI;
+    end process input_output_select_p;
+  end generate NOT_perfetly_interleaved_variant;
   
   -----------------------------------------------------------------------------
   -- Control path of perfectly interleaved variant
@@ -235,7 +236,7 @@ begin
         -- Variable assignments
         SxorK(i) := StateOutxD(i) xor KeyOutxD(i);
         
-     
+--     report "IAM PERFECTLY INTERLEAVED VARIANT";
        
         -- only for first share Key XOR RCON value
         if i = 0 then 
@@ -319,6 +320,7 @@ begin
         else
           CxDO(i)  <= StateOutxD(i)  xor KeyOutxD(i)  xor K03xD(i) ;
         end if;
+         report "IAM PERFECTLY INTERLEAVED VARIANT";
       end loop;  -- i
 
       -- Move K register up during cycles 13 - 20
@@ -326,6 +328,8 @@ begin
 
       -- Signal that calculations are finished and CT appears at output
       DonexSO <= State1xS and LastRoundxS;
+      
+     
 
       -- Reset RCON on start 
       RstRCONxS <= RstxBI and not StartxSI;
