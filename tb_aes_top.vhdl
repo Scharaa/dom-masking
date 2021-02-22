@@ -7,7 +7,7 @@ END tb_aes_top;
 
 ARCHITECTURE Behavior OF tb_aes_top IS
 
--- constant n --
+
 
 
 
@@ -21,8 +21,8 @@ ARCHITECTURE Behavior OF tb_aes_top IS
     SIGNAL RstxBI : STD_LOGIC := '0';
     SIGNAL PTxDI  : t_shared_gf8(2 DOWNTO 0):= (others => "00000000");
     SIGNAL KxDI  : t_shared_gf8(2 DOWNTO 0):= (others => "00000000");
-    SIGNAL Zmul1xDI : t_shared_gf4(2 downto 0);  -- for y1 * y0
-    SIGNAL Zmul2xDI : t_shared_gf4(2 downto 0);  -- for O * y1
+    SIGNAL Zmul1xDI : t_shared_gf4(2 downto 0):= (others => "0010");  -- for y1 * y0
+    SIGNAL Zmul2xDI : t_shared_gf4(2 downto 0):= (others => "0000"); -- for O * y1
     SIGNAL Zmul3xDI : t_shared_gf4(2 downto 0):= (others => "0000");  -- for O * y0
     SIGNAL Zinv1xDI : t_shared_gf2(2 downto 0):= (others => "00");  -- for inverter
     SIGNAL Zinv2xDI : t_shared_gf2(2 downto 0):= (others => "00");  -- ...
@@ -85,7 +85,7 @@ ARCHITECTURE Behavior OF tb_aes_top IS
 		
 	----------------------------------------------------------------------------
 --     
-  TV_PT <= ("00000000", "00010000", "00100000");
+  TV_PT <= ("00100000", "11010000", "00100000");
   TV_CT <= ("00000000", "00010000", "00100000");
   TV_KY <= ("00000000", "00000001", "00000010");
 --       ----------------------------------------------------------------------------
@@ -100,18 +100,18 @@ ARCHITECTURE Behavior OF tb_aes_top IS
                 StartxSI <= '1';                
                     FOR I IN 0 TO 15 LOOP    
                         WAIT FOR CLK_PERIOD;    
-                        REPORT "Salaaaaaam";
+                    
                         PTxDI <= TV_PT;
                         KxDI   <= TV_KY;
-                        TV_CT <= CxDO;
+--                        TV_CT <= CxDO;
 
                     END LOOP;
                 StartxSI <= '0';
              
                 
 --        ----------------------------------------------------------------------------
---        WAIT UNTIL DonexSO = '1';
-       
+        WAIT UNTIL DonexSO = '0';
+   
          WAIT FOR CLK_PERIOD/2;
                                 
 --                --------------------------------------------------------------------------
